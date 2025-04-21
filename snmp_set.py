@@ -1,20 +1,15 @@
+
 import asyncio
 from pysnmp.hlapi.v3arch.asyncio import *
 
+# 此程式用來執行 重新開機(docsDevResetNow)
 
-async def run():
-    snmpEngine = SnmpEngine()
-    
-    iterator = await next_cmd(
-        snmpEngine,
-        CommunityData("public", mpModel=0),
-        await UdpTransportTarget.create(("172.16.40.15", 161)),
-        ContextData(),
-        ObjectType(ObjectIdentity("SNMPv2-MIB", "sysDescr", 0)),
+async def my_set():
+    snmpEngine=SnmpEngine() 
+    result= set_cmd(snmpEngine,CommunityData('private',mpModel=1),await UdpTransportTarget.create(('172.16.42.199',161)),ContextData(),ObjectType(ObjectIdentity("1.3.6.1.2.1.69.1.1.3.0"),Integer(1))
     )
+    errorIndication,    errorStatus,  errorIndex, varBinds = await result
 
-    errorIndication, errorStatus, errorIndex, varBinds = await iterator
-    
     if errorIndication:
         print(errorIndication)
 
@@ -28,8 +23,6 @@ async def run():
     else:
         for varBind in varBinds:
             print(" = ".join([x.prettyPrint() for x in varBind]))
-
     snmpEngine.close_dispatcher()
-
-
-asyncio.run(run())
+               
+asyncio.run(my_set())
