@@ -4,15 +4,15 @@ from pysnmp.hlapi.v3arch.asyncio import *
 
 async def run():
     snmpEngine = SnmpEngine()
-
-    iterator = next_cmd(
+    
+    iterator = await next_cmd(
         snmpEngine,
         CommunityData("public", mpModel=0),
         await UdpTransportTarget.create(("172.16.40.15", 161)),
         ContextData(),
         ObjectType(ObjectIdentity("SNMPv2-MIB", "sysDescr", 0)),
     )
-    
+
     errorIndication, errorStatus, errorIndex, varBinds = await iterator
     
     if errorIndication:

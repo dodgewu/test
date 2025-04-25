@@ -6,8 +6,10 @@ name = "pypi"
 [packages]
 snmpsim = "*"
 pysnmp = "*"
+telnetlib3 = "*"
 
 [dev-packages]
+pysnmp = "*"
 
 [requires]
 python_version = "3.12"
