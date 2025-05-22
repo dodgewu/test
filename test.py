@@ -1,35 +1,18 @@
-import asyncio
-from pysnmp.hlapi.v3arch.asyncio import *
+import logging
+import turtle
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
 
-async def run():
-    snmpEngine = SnmpEngine()
+# Create a turtle object
+logging.info("Creating turtle...")
+t = turtle.Turtle()
 
-    iterator = next_cmd(
-        snmpEngine,
-        CommunityData("public", mpModel=0),
-        await UdpTransportTarget.create(("172.16.40.15", 161)),
-        ContextData(),
-        ObjectType(ObjectIdentity("SNMPv2-MIB", "sysDescr", 0)),
-    )
-    
-    errorIndication, errorStatus, errorIndex, varBinds = await iterator
-    
-    if errorIndication:
-        print(errorIndication)
+# Draw a square
+logging.info("Drawing a square...")
+for _ in range(4):
+    t.forward(100)
+    t.right(90)
 
-    elif errorStatus:
-        print(
-            "{} at {}".format(
-                errorStatus.prettyPrint(),
-                errorIndex and varBinds[int(errorIndex) - 1][0] or "?",
-            )
-        )
-    else:
-        for varBind in varBinds:
-            print(" = ".join([x.prettyPrint() for x in varBind]))
-
-    snmpEngine.close_dispatcher()
-
-
-asyncio.run(run())
+logging.info("Finished drawing!")
+turtle.done()

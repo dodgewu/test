@@ -2,9 +2,10 @@ import asyncio
 from pysnmp.hlapi.v3arch.asyncio import *
 
 def check(iterator):
-    errorIndication, errorStatus, errorIndex, varBinds = iterator
+    errorIndication, errorStatus, errorIndex, varBinds =  iterator
     if errorIndication:
             print(errorIndication)
+            return 0
 
     elif errorStatus:
                 print(
@@ -13,9 +14,9 @@ def check(iterator):
                         errorIndex and varBinds[int(errorIndex) - 1][0] or "?",
                     )
                 )
+                return 0
     else:
-                for varBind in varBinds:
-                    print(" = ".join([x.prettyPrint() for x in varBind]))
+        return 1
 
 if __name__=="__main__":
         check()
