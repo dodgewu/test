@@ -1,6 +1,6 @@
 import dut
 import asyncio
-import NTL7465LG_36,NTL7465LG_1604
+import NTL7465LG_36,NTL7465LG_1604,sample_test
 
 async def main():
     # my_dut=dut.Dut(ip='172.16.42.14',cmts='172.16.1.9',mac='f8fb',fw='CH7465PGFW-NCIP-6.15.36-SH(EU)',test_case='NTL7465LG_36')
@@ -15,6 +15,12 @@ async def main():
     await test1604
     # test8063= NTL7465LG_8063.test(my_dut)
     # await test8063
+
+    my_dut=dut.Dut(ip='',cmts='172.16.1.6',mac='',fw='Sample_test_CW151',wifi_55_ver=None,wifi_24_ver=None)
+    cd8021=sample_test.sample_test(my_dut)
+    await cd8021
+
+
     
 
 asyncio.run(main())

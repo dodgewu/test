@@ -13,12 +13,15 @@ class MySnmp():
         self.test_case=test_case
         self.dut=dut 
         self.ip=dut.ip
+    
     def set_oid(self,oid):
         """This method is used to set the OID of MIBs that you want to set."""
         self.oid=oid
+    
     async def set_base_type(self,oid):
         """This method is used to set the base type of MIBs that you want to set."""
         self.base_type= await self.get_base_type(oid,self.dut)
+    
     def set_value(self,value):
         """This method is used to set the value of MIBs that you want to set."""    
         self.value=value
@@ -45,7 +48,6 @@ class MySnmp():
         except Exception as e:
             print(f"There is an error occured when setting the value of MIBs you assigned.{e}")
 
-
     def type_transfor(self,value,base_type):
         """This method can transform the base type of value."""
         try:
@@ -70,6 +72,7 @@ class MySnmp():
                     self.value = ObjectIdentifier (value)
         except Exception as e :
             print(f"There is an error occured when transform the base type of value you assigned.{e}")
+    
     async def my_snmp_get(self,logger,oid):
             """you can get an value of MIB,it will return a ObjectType for User to analysis the result of snmpget.
             """
@@ -90,7 +93,7 @@ class MySnmp():
             logger.store_result(self.dut,result)
             snmpEngine.close_dispatcher()
             
-            # 回傳str type 的結果
+            # 回傳 str type 的結果
             return tmp
 
     async def get_base_type(self,oid,dut)-> str: 
@@ -111,6 +114,38 @@ class MySnmp():
         snmpengine.close_dispatcher()
         self.base_type=type(tmp)
         return tmp
+
+    async def my_snmp_walk(self,logger,oid,end_oid):
+        """此function 可以跑一整個table e.g.ifTable。
+            需自行設定結束OID。
+        """
+        try:
+            snmpEngine = SnmpEngine()
+            # walk_cmd是多個get_next組成，回傳generator
+            result=  walk_cmd(
+                            snmpEngine,
+                            CommunityData('private',mpModel=1),
+                            await UdpTransportTarget.create(('172.16.160.24', 161)),
+                            ContextData(),
+                            ObjectType(ObjectIdentity(oid)),
+                            lexicographicMode=False
+                            )
+            #generate generator 的值
+            g = [item async for item in result]
+            # 設定結束的OID
+            end=''
+            # 設定i為0，因為g是list，所以可以用index來取值
+            i=0
+            while end!=end_oid and i < len(g):    
+                for d in g[i][3]:
+                        end = d[0]
+                        print(f"{d[0]}={d[1]}")
+                        # 存入log檔
+                        # logger.store_result(self.dut,result)
+                        i+= 1
+            snmpEngine.close_dispatcher()
+        except Exception as e:
+            print(f"There is an error occured when walking the table of MIBs you assigned.{e}")
 
 if __name__=='__main__':
     my_dut=dut.Dut(ip='172.16.42.14',cmts='172.16.1.9',mac='f8fb',fw='Test',wifi_24_ver=None,wifi_55_ver=None)
