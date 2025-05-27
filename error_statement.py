@@ -38,7 +38,7 @@ class SNMPResultLogger:
         if isinstance(result,str):
             try:
                 print(f"\nThe result of {self.fw}-{dut.mac}-{self.test_case}:({explanation})\n")
-                with open(file_path, "a") as f:
+                with open(file_path, "a",encoding="utf-8") as f:
                         print(f"{self.fw}-{self.test_case}:\n")
                         f.write(f"[{hhmmss}]{result}\n")
                         f.write(f"----------------------------------------------------------------------------------\n")
@@ -57,7 +57,7 @@ class SNMPResultLogger:
         else:
             print(f"\nThe result of {self.fw}-{dut.mac}-{self.test_case}:(SNMP)\n")
             try:
-                with open(file_path, "a") as f:
+                with open(file_path, "a",encoding="utf-8") as f:
                     # varBind[0]:oid, varBind[1]:value
                     for varBind in varBinds:
                         print(f"{self.fw}-{self.test_case}:\n")
