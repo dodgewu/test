@@ -1,5 +1,5 @@
 class Dut():
-    def __init__(self,mac,cmts,ip,fw,wifi_24_ver,wifi_55_ver):
+    def __init__(self,mac,cmts,ip,fw,**kwargs):
         # MAC後四碼
         self.mac=mac
         # 上線的CMTS
@@ -8,8 +8,7 @@ class Dut():
         self.ip=ip
         # 此次測試FW
         self.fw=fw
-        self.wifi_24_ver=wifi_24_ver  
-        self.wifi_55_ver=wifi_55_ver
-
-
+        # 動態設定 keywords arguments
+        for key,value in kwargs.items():
+            setattr(self,key,value)
 

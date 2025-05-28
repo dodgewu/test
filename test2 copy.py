@@ -24,7 +24,7 @@ async def test():
                         await UdpTransportTarget.create(('172.16.160.24', 161)),
                         # await UdpTransportTarget.create(('172.16.160.30', 161)),
                         ContextData(),
-                        ObjectType(ObjectIdentity('')),
+                        ObjectType(ObjectIdentity('1.3.6.1.2.1.2.2')),
                         lexicographicMode=False
                         )
             g = [item async for item in result]
