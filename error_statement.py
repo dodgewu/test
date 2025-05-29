@@ -37,12 +37,10 @@ class SNMPResultLogger:
         # 一般文字
         if isinstance(result,str):
             try:
-                print(f"\nThe result of {self.fw}-{dut.mac}-{self.test_case}:({explanation})\n")
-                with open(file_path, "a") as f:
-                        print(f"{self.fw}-{self.test_case}:\n")
+                with open(file_path, "a",encoding="utf-8") as f:
+
                         f.write(f"[{hhmmss}]{result}\n")
-                        f.write(f"----------------------------------------------------------------------------------\n")
-                        print("writting log success!")
+                        f.write(f"----------------------------------------------------------------------------------")
                         return True
             except Exception as e:
                 print(f"Failed to write to file: {e}")
@@ -55,13 +53,14 @@ class SNMPResultLogger:
             f.write(f"[{hhmmss}]{self.fw}-{self.test_case}:\nError Status: {errorStatus.prettyPrint()} at {errorIndex}\n")
             print(f"Error Status: {errorStatus.prettyPrint()} at {errorIndex}\n")
         else:
-            print(f"\nThe result of {self.fw}-{dut.mac}-{self.test_case}:(SNMP)\n")
+            # print(f"\nThe result of {self.fw}-{dut.mac}-{self.test_case}:(SNMP)")
             try:
-                with open(file_path, "a") as f:
+                with open(file_path, "a",encoding="utf-8") as f:
                     # varBind[0]:oid, varBind[1]:value
                     for varBind in varBinds:
-                        print(f"{self.fw}-{self.test_case}:\n")
-                        print(f"{varBind[0]}={varBind[1]}\n------------------------------------")
+                        # print(f"{self.fw}-{self.test_case}:\n")
+                        # print(f"{varBind[0]}={varBind[1]}\n------------------------------------")
+                        f.write(f"<{dut.mac}:>\n")
                         f.write(f"[{hhmmss}]{varBind[0]}={varBind[1]}\n")
                         f.write(f"----------------------------------------------------------------------------------\n")
             except Exception as e:
