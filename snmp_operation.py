@@ -44,7 +44,9 @@ class MySnmp():
                             )
             # 寫入資訊
             logger.store_result(self.dut,result)
+            a,b,c,d=result
             snmpEngine.close_dispatcher()
+            return d
         except Exception as e:
             print(f"There is an error occured when setting the value of MIBs you assigned.{e}")
 
@@ -85,10 +87,11 @@ class MySnmp():
                         ObjectType(ObjectIdentity(oid)),
                         )
             a,b,c,d=result
-            tmp=''
+            tmp=None
             for i in d:
                 self.result=type(i[1])
-                tmp=i[1]
+                tmp= i[1].prettyPrint()
+
             # 存入log檔
             logger.store_result(self.dut,result)
             snmpEngine.close_dispatcher()
@@ -124,26 +127,30 @@ class MySnmp():
             # walk_cmd是多個get_next組成，回傳generator
             result=  walk_cmd(
                             snmpEngine,
-                            CommunityData('private',mpModel=1),
-                            await UdpTransportTarget.create(('172.16.160.24', 161)),
+                            CommunityData(self.community,mpModel=self.snmp_ver),
+                            await UdpTransportTarget.create((self.ip, 161)),
                             ContextData(),
                             ObjectType(ObjectIdentity(oid)),
                             lexicographicMode=False
                             )
             #generate generator 的值
             g = [item async for item in result]
+
             # 設定結束的OID
             end=''
             # 設定i為0，因為g是list，所以可以用index來取值
             i=0
+            store_into_log=''
             while end!=end_oid and i < len(g):    
                 for d in g[i][3]:
                         end = d[0]
-                        print(f"{d[0]}={d[1]}")
-                        # 存入log檔
-                        # logger.store_result(self.dut,result)
+                        tmp=f"{d[0]}={d[1].prettyPrint()}"
+                        store_into_log+=f"{tmp}\n"
                         i+= 1
+             # 存入log檔
+            logger.store_result(self.dut,store_into_log)
             snmpEngine.close_dispatcher()
+            return store_into_log
         except Exception as e:
             print(f"There is an error occured when walking the table of MIBs you assigned.{e}")
 
