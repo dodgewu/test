@@ -3,6 +3,13 @@ from tabulate import tabulate
 
 
 class MySqlite():
+    """使用步驟:
+    1. 建立實例，e.g. my_sql = MySqlite(db='CD8021.db')
+    2. 建立連線，e.g. my_sql.build_conn()
+    3. 建立table，e.g. my_sql.create_table()
+    4. 進行sql 處理，e.g. my_sql.insert_data(sql_command="INSERT INTO users (name, age) VALUES ('shien', 18)")
+    5. 關閉連線，e.g. my_sql.close_conn()
+    """
     def __init__(self, db, **kwargs):
         self.db = db
         # 動態設定 keywords arguments
@@ -10,7 +17,7 @@ class MySqlite():
             setattr(self, key, value)
 
     def build_conn(self):
-        """建立連線"""
+        """建立與db的連線"""
         try:
             # 選擇建立連線的db
             self.conn = sqlite3.connect(self.db)
@@ -25,52 +32,73 @@ class MySqlite():
         self.conn.close()
         self.cursor.close()
 
-    def create_table(self):
-        # 使用instance 的constructor 來建造table
-        self.cursor.execute('''
+    def create_table(self,sql_command=None):
+        """在連線的db中建立table
+            SYNTAX:
             CREATE TABLE IF NOT EXISTS users (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 name TEXT ,
                 age INTEGER
             )
-            ''')
+        """
+        # 使用instance 的constructor 來建造table
+        self.cursor.execute(sql_command)
         self.conn.commit()
 
     def insert_data(self, sql_command=None):
-        self.cursor.execute('''
-        INSERT INTO users (name,age)
-        VALUES (?,?)
-        ''', ('shien', None))
+        """插入資料到db.table中
+            syntax: INSERT INTO users (name,age) VALUES ('shien', 18)
+        """
+        self.cursor.execute(sql_command)
         self.conn.commit()
 
     def select_data(self, sql_command=None):
         """顯示選擇資料並顯示在Terminal 中
             syntax SELECT * FROM users WHERE...
         """
-        self.cursor.execute('SELECT * FROM users')
+        self.cursor.execute(sql_command)
         # 先執行，再抓欄位名才有資料
         col_name = [desc[0] for desc in self.cursor.description]
         rows = self.cursor.fetchall()
-        print(tabulate(rows, headers=col_name, tablefmt="grid"))
+        # 使用tabulate來美化顯示，maxcolwidths=寬度*col_name的個數  # 設定每一欄的最大寬度為30
+        print(tabulate(rows, headers=col_name, tablefmt="grid",maxcolwidths=[40]*len(col_name)))
 
     def delete_table(self, sql_command=None):
         """清空db中的資料
             syntax: delete from users
         """
-        self.cursor.execute("delete from users")
+        self.cursor.execute(sql_command)
         self.conn.commit()
 
     def drop_table(self, sql_command=None):
-        self.cursor.execute("DROP TABLE IF EXISTS users")
+        """ 刪除db中的table
+            syntax: DROP TABLE IF EXISTS users
+        """
+        self.cursor.execute(sql_command)
         self.conn.commit()
 
 
 if __name__ == '__main__':
-    my_sql = MySqlite(db='test.db')
+    my_sql = MySqlite(db='CD8021.db')
     my_sql.build_conn()
-    # my_sql.create_table()
-    # my_sql.delete_table()
-    # my_sql.select_data()
-    # my_sql.insert_data()
-    my_sql.drop_table()
-    my_sql.select_data()
+    my_sql.create_table("""CREATE TABLE IF NOT EXISTS model (
+                id INTEGER PRIMARY KEY aUTOINCREMENT,
+                Docsis_version REAL,
+                Firmware_version TEXT,
+                sysDescr TEXT,
+                docsDevSwVersion TEXT
+                
+            )""")
+    my_sql.insert_data("""insert into model(Docsis_version,sysDescr,docsDevSwversion,Firmware_version) 
+                       values(3.0,'normal','DOCSIS 3.1 Cable Modem <<HW_REV: V1.0; VENDOR: Compal Broadband Networks; BOOTR: 2.8.47alpha0; SW_REV: Cert_24.2.0.4; MODEL: MNB1525 CD8021>>'
+                       ,'Cert_24.2.0.4')""")
+    my_sql.insert_data("""insert into model(Docsis_version,sysDescr,docsDevSwversion,Firmware_version) 
+                       values(3.0,'mac-14','MAC-14 test image for CW151'
+                       ,'Cert_24.2.0.3 MAC14_ver')""")
+    my_sql.insert_data("""insert into model(Docsis_version,sysDescr,docsDevSwversion,Firmware_version) 
+                       values(3.1,'normal','DOCSIS 3.1 Cable Modem <<HW_REV: V1.0; VENDOR: Compal Broadband Networks; BOOTR: 2.8.47alpha0; SW_REV: Cert_24.2.0.4; MODEL: MNB1525 CD8021>>'
+                       ,'Cert_24.2.0.4')""")
+    my_sql.insert_data("""insert into model(Docsis_version,sysDescr,docsDevSwversion,Firmware_version) 
+                       values(3.1,'normal','MAC-14 test image for CW151'
+                       ,'Cert_24.2.0.3 MAC14_ver')""")
+    my_sql.select_data("SELECT * FROM model")
