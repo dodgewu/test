@@ -1,9 +1,9 @@
 import dut
 import asyncio
-import NTL7465LG_36,NTL7465LG_1604,sample_test
+import NTL7465LG_36,NTL7465LG_1604,sample_test,upgrade
 import test
 
-async def main():
+async def cd8021():
     #CD8021 submission
     # 原始的 MAC 位址列表
     mac_string = """34:2C:C4:FE:16:2A
@@ -73,6 +73,10 @@ async def main():
         cd8021=sample_test.sample_test(my_dut,(index,mac,ip))
         await cd8021
 
+async def main():
+    my_dut=dut.Dut(ip='172.16.190.10',cmts='172.16.1.15',mac='8e02',fw='CH8568LG-NCIP-7.35.521.7')
+    my_upgrade=upgrade.snmp_upgrade(my_dut)
+    await my_upgrade
 
 
 asyncio.run(main())

@@ -19,6 +19,8 @@ async def bpi(tel,dut,logger):
     logger.store_result(dut,response,explanation="BPI result in CMTS")
     await tel.connection_closed()
     return result
+
+
 async def result_analy(response,oper):
         """用來分析結果"""
         if oper=='bpi':
@@ -27,4 +29,4 @@ async def result_analy(response,oper):
                 return False
             else:
                 return True
-            
+       
