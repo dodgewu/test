@@ -1,4 +1,4 @@
-import snmp_set,asyncio,dut
+import snmp_operation,asyncio,dut
 from pysnmp.hlapi.v3arch.asyncio import *
 async def main(dut):
     await asyncio.sleep(1)

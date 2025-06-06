@@ -25,7 +25,7 @@ class MySnmp():
     def set_value(self,value):
         """This method is used to set the value of MIBs that you want to set."""    
         self.value=value
-        self.type_transfor(value,self.base_type)
+        self.type_transfor(value)
 
     async def my_snmp_set(self,logger,oid,value):
         """This method assists users in setting MIB (Management Information Base) values using the snmpset command, 
@@ -44,14 +44,16 @@ class MySnmp():
                             )
             # 寫入資訊
             logger.store_result(self.dut,result)
+            a,b,c,d=result
             snmpEngine.close_dispatcher()
+            return d
         except Exception as e:
             print(f"There is an error occured when setting the value of MIBs you assigned.{e}")
 
-    def type_transfor(self,value,base_type):
+    def type_transfor(self,value):
         """This method can transform the base type of value."""
         try:
-            match base_type:
+            match self.base_type:
                 case 'Integer32':
                     self.value = Integer32(value)
                 case 'Gauge32':
@@ -70,6 +72,7 @@ class MySnmp():
                     self.value = TimeTicks(value)
                 case 'ObjectIdentifier':
                     self.value = ObjectIdentifier (value)
+        
         except Exception as e :
             print(f"There is an error occured when transform the base type of value you assigned.{e}")
     
@@ -85,36 +88,47 @@ class MySnmp():
                         ObjectType(ObjectIdentity(oid)),
                         )
             a,b,c,d=result
+
+            
             tmp=None
+        
             for i in d:
+                # self.result是給error_statement 判斷是 str 或 varbinds 的方法。
                 self.result=type(i[1])
-                tmp= i[1].prettyPrint()
+                tmp= i[1]
+            #     把 varbinds 轉成 str type 
+            #     tmp= i[1].prettyPrint()
 
             # 存入log檔
             logger.store_result(self.dut,result)
+
             snmpEngine.close_dispatcher()
             
-            # 回傳 str type 的結果
+            # 回傳snmp get 的結果
             return tmp
 
     async def get_base_type(self,oid,dut)-> str: 
         """In this method, you can get one base type of MIB(OID). 
         The base type will helpful when you are using my_snmp_get() to transform the type of assigned value. """
-        snmpengine=SnmpEngine()
-        result=get_cmd(
-            snmpengine,
-            CommunityData(self.community,mpModel=self.snmp_ver),
-            await UdpTransportTarget.create((dut.ip,161)),
-            ContextData(),
-            ObjectType(ObjectIdentity(oid))
-        )
-        a,b,c,d= await result
-        tmp=''
-        for tmp_oid,tmp_value in d:
-            tmp= str(type(tmp_value).__name__)
-        snmpengine.close_dispatcher()
-        self.base_type=type(tmp)
-        return tmp
+        try:
+            snmpengine=SnmpEngine()
+            result=await get_cmd(
+                snmpengine,
+                CommunityData(self.community,mpModel=self.snmp_ver),
+                await UdpTransportTarget.create((dut.ip,161)),
+                ContextData(),
+                ObjectType(ObjectIdentity(oid))
+            )
+            a,b,c,d=  result
+            tmp=''
+            for tmp_oid,tmp_value in d:
+                tmp= str(type(tmp_value).__name__)
+            snmpengine.close_dispatcher()
+    
+            return tmp
+        except Exception as e:
+            print(f"There is an error occured when getting the base type of MIBs you assigned.{e}")
+            return None
 
     async def my_snmp_walk(self,logger,oid,end_oid):
         """此function 可以跑一整個table e.g.ifTable。
@@ -152,9 +166,23 @@ class MySnmp():
         except Exception as e:
             print(f"There is an error occured when walking the table of MIBs you assigned.{e}")
 
-if __name__=='__main__':
-    my_dut=dut.Dut(ip='172.16.42.14',cmts='172.16.1.9',mac='f8fb',fw='Test',wifi_24_ver=None,wifi_55_ver=None)
+async def devel_test():
+    test_case='test_case0605'
+    my_dut=dut.Dut(ip='172.16.42.10',cmts='172.16.1.9',mac='8e02',fw='Test')
+    my_logger=error_statement.SNMPResultLogger(my_dut,test_case)
+    my_logger.init_folder()
     # test36= NTL7465LG_36.test(my_dut)
     # await test36
-    my_get=MySnmp(my_dut)
-    asyncio.run(my_get.my_snmp_set())
+    my_get=MySnmp(my_dut,test_case)
+    result= await my_get.my_snmp_get(my_logger,'1.3.6.1.2.1.1.3.0')
+
+    # timeTicks type 分解成秒數
+    time=float(result.prettyPrint())/100
+    mins= int(time // 60)
+    secs= int(time % 60)
+    print(f'sysUpTimeInstance: {mins} minutes and {secs} seconds')
+
+
+if __name__=='__main__':
+    asyncio.run(devel_test())
+

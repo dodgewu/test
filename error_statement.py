@@ -61,7 +61,7 @@ class SNMPResultLogger:
                         # print(f"{self.fw}-{self.test_case}:\n")
                         # print(f"{varBind[0]}={varBind[1]}\n------------------------------------")
                         f.write(f"<{dut.mac}:>\n")
-                        f.write(f"[{hhmmss}]{varBind[0]}={varBind[1]}\n")
+                        f.write(f"[{hhmmss}]{varBind[0]}={varBind[1].prettyPrint()}\n")
                         f.write(f"----------------------------------------------------------------------------------\n")
             except Exception as e:
                 print(f"Failed to write to file: {e}")

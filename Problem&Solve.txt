@@ -1,0 +1,15 @@
+P1: 
+    "from pysnmp.hlapi.v3arch.asyncio import *" 會一直報錯，(NoModuleError)?
+S1: 
+    主因是該module <7. 的版本沒有該位置，須把pysnmp升級至7.多才行。 
+    若是pipenv，則要去Pipfile，將 pysnmp = "==7.1.20" ，再 pipensv install 升級，
+    最後再pipenv run pip show pysnmp 去check version。
+
+P2:
+    不同mibs有不同回傳的type，分析回傳type時很麻煩，
+S2:
+    可以使用.prettyPrint()轉乘str type
+
+P3:
+    不同的mibs其 set value 後，a,b,c,d=varbinds中，d 不一定是一樣格式，d的element可能為 0 or 4。
+    e.g. d[0]: oid+value  or  d[0] : oid ; d[1] : value

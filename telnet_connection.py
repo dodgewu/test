@@ -1,23 +1,13 @@
 import asyncio
 import telnetlib3
-import error_statement,re,telnet_operation
+import error_statement,re,telnet_operation,dut,sqlite3
 
 #建立基本的telnet連線
 class tel_connection:
-    def tel_oper(self,tmp):
-        if tmp=="bpi":
-            return f"scm | inc {self.dut_mac}\n"
+    # def tel_oper(self,tmp):
+    #     if tmp=="bpi":
+    #         return f"scm | inc {self.dut_mac}\n"
         
-    # If you want yo write a determination, wrtie an function but not method.
-    # def result_check(self,response,oper):
-    #     match oper:
-    #         case "bpi":
-    #             bpi=response.find("online(pt)")
-    #             if bpi==-1:
-    #                 print(f"BPI failed\n{response}")
-    #                 return
-    #             else:
-    #                 print("BPI successful!!")
     def get_login_info(self,cmts):
         match cmts:
             case "172.16.1.9": 
@@ -39,8 +29,10 @@ class tel_connection:
             if self.reader:
                 print(await self.reader.read(1024))
     async def write_command(self,oper):
-        command=self.tel_oper(oper)
-        self.writer.write(command)  
+        # command=self.tel_oper(oper)
+        # self.writer.write(command)  
+        oper = oper + "\n"
+        self.writer.write(oper)  
         await asyncio.sleep(1)
     async def read_command(self):
             response = await self.reader.read(1024) 
@@ -59,6 +51,7 @@ class tel_connection:
         except Exception as e:
             print(f"Failed to connect to {self.cmts}:{self.port}")
             print(f"Error: {e}")
+    
     def __init__(self,dut):
         self.cmts=dut.cmts
         self.dut_mac=dut.mac
@@ -69,6 +62,20 @@ class tel_connection:
 
 
 # Run the async Telnet client
-# if __name__=="__main__":
-#     test=tel_connection("172.16.1.6","0bda")
-#     asyncio.run(test.main())
+async def main():
+    test_case='test_telnet'
+    my_dut=dut.Dut(ip='172.16.42.10',cmts='172.16.1.9',mac='8e02',fw='Test')
+    my_logger=error_statement.SNMPResultLogger(my_dut,test_case)
+    my_logger.init_folder()
+    test=tel_connection(my_dut)
+    await develop_test(test)
+async def develop_test(test):
+    command = input("Enter command to execute: ")
+    command=command.strip()
+    await test.tel_connection()
+    await test.logging()
+    await test.write_command(command)
+    await test.read_command()
+    await test.connection_closed()
+if __name__=="__main__":
+    asyncio.run(main())
