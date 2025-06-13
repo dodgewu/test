@@ -4,6 +4,9 @@ from datetime import datetime
 # import pandas,openpyxl
 
 async def sample_test(dut,my_tuple):
+    # CD8021 submission test
+    """This function is used to test the CD8021 submission."""
+
     # 1. 獲取ehternet mac
     # 2. 獲取hfc mac
     # 3. sysDesrc check 

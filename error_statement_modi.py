@@ -1,7 +1,7 @@
 import asyncio
 from pysnmp.hlapi.v3arch.asyncio import *
 from datetime import datetime
-import os
+import os,logging
 
 class SNMPResultLogger:
     def __init__(self,dut,test_case, base_path=r"D:\Data\pysnmp"):
@@ -12,6 +12,7 @@ class SNMPResultLogger:
 
     def _ensure_base_path(self):
         """目的:建立基礎的folder path，範例 D:\Data\pysnmp\FW_NAME"""
+        # 若不存在該資料夾的話，新建一個。若已存在，則不動作。
         if not os.path.exists(self.base_path):
             try:
                 os.makedirs(self.base_path)
@@ -19,8 +20,8 @@ class SNMPResultLogger:
             except Exception as e:
                 print(f"Error creating base path: {e}")
 
-    def init_folder(self):
-        """建立一個 test_case.txt"""
+    def init_log(self):
+        """建立一個 log 的文件"""
         self.folder_path = os.path.join(self.base_path, self.test_case)
         if not os.path.exists(self.folder_path): 
             try:

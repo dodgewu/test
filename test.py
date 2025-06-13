@@ -1,5 +1,7 @@
 import re,snmp_operation,error_statement,dut
 from pysnmp.hlapi.v3arch.asyncio import *
+
+# 此程式用來批量升級CD8021的韌體
 def cmts_mac_table():
     str = """
 
@@ -114,8 +116,55 @@ async def bulk_upgrade(ip_list,ver):
                     snmpEngine.close_dispatcher()
                 except Exception as e :
                     print(f"There is an error occured when setting the value of MIBs you assigned.{e}")
-        
-        
+ 
+async def bulk_upgrade_0529(ip_list,ver):
+    if ver=='nor':
+        for ip in ip_list:
+            try:
+                # 設定SNMP的OID
+                snmpEngine=SnmpEngine() 
+                result1= await set_cmd(snmpEngine,
+                                CommunityData('private',mpModel=1),
+                                await UdpTransportTarget.create((ip,161)),
+                                ContextData(),
+                                ObjectType(ObjectIdentity('1.3.6.1.2.1.69.1.3.1.0'),IpAddress('172.16.1.233')),
+                                ObjectType(ObjectIdentity('1.3.6.1.2.1.69.1.3.2.0'),OctetString(r'stanley\CD8021\fw\MNB1525 CD8021.img')),
+                                )
+                
+                result= await set_cmd(snmpEngine,
+                                CommunityData('private',mpModel=1),
+                                await UdpTransportTarget.create((ip,161)),
+                                ContextData(),
+                                ObjectType(ObjectIdentity('1.3.6.1.2.1.69.1.3.3.0'),Integer(1)))
+                a,b,c,d=  result
+                print(f"{ip}:{d[0]}")
+                snmpEngine.close_dispatcher()
+            except Exception as e :
+                print(f"There is an error occured when you are upgrading normal {e}")
+    elif ver=='mac':
+            for ip in ip_list:
+                try:
+                    # 設定SNMP的OID
+                    snmpEngine=SnmpEngine() 
+                    result1= await set_cmd(snmpEngine,
+                                    CommunityData('private',mpModel=1),
+                                    await UdpTransportTarget.create((ip,161)),
+                                    ContextData(),
+                                    ObjectType(ObjectIdentity('1.3.6.1.2.1.69.1.3.1.0'),IpAddress('172.16.1.233')),
+                                    ObjectType(ObjectIdentity('1.3.6.1.2.1.69.1.3.2.0'),OctetString(r'stanley\CD8021\fw\MNB1525 CD8021-MAC-14.img')),
+                                    )
+                    result= await set_cmd(snmpEngine,
+                                    CommunityData('private',mpModel=1),
+                                    await UdpTransportTarget.create((ip,161)),
+                                    ContextData(),
+                                    ObjectType(ObjectIdentity('1.3.6.1.2.1.69.1.3.3.0'),Integer(1)))
+                    a,b,c,d= result
+                    print(f"{ip}:{d[0]}")
+                    # print(f"{ip}:{d[0]}")
+                    snmpEngine.close_dispatcher()
+                except Exception as e :
+                    print(f"There is an error occured when you are upgrading mac-14 {e}")
+       
 if __name__ == "__main__":
     ee=cmts_mac_table()
     for i,j in ee:
